@@ -14,8 +14,8 @@ setup(
     description="Automatically organize files in folders into categorized subfolders",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Phil",
-    url="https://github.com/yourusername/folder-organizer",
+    author="Phil Kirschner",
+    url="https://github.com/philkirschner/folder-organizer",
     py_modules=["organize_folders"],
     install_requires=[
         "PyYAML>=6.0",

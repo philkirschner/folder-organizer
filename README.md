@@ -1,5 +1,7 @@
 # Folder Organizer
 
+> **Built with [Claude Code](https://claude.com/claude-code)** - A practical example of what you can create with AI-assisted development
+
 A smart, configurable Python tool that automatically organizes files in your Downloads folder (or any folder) into categorized subfolders based on file type, with automatic archiving and cleanup of old files.
 
 ## Features
