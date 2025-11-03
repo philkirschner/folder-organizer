@@ -118,45 +118,43 @@ python organize_folders.py --version
 python organize_folders.py --help
 ```
 
-## Automation
+## Running the Organizer
 
-### macOS (launchd)
+### On-Demand (Recommended)
 
-Create a plist file at `~/Library/LaunchAgents/com.user.folder-organizer.plist`:
+Run manually whenever your folders need organizing:
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.user.folder-organizer</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/usr/bin/python3</string>
-        <string>/path/to/organize_folders.py</string>
-    </array>
-    <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>9</integer>
-        <key>Minute</key>
-        <integer>0</integer>
-    </dict>
-    <key>StandardOutPath</key>
-    <string>/tmp/folder-organizer.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/folder-organizer-error.log</string>
-</dict>
-</plist>
-```
-
-Load the agent:
 ```bash
-launchctl load ~/Library/LaunchAgents/com.user.folder-organizer.plist
+python organize_folders.py
 ```
 
-### Linux (cron)
+### macOS: Create a Double-Click App with Automator
+
+The easiest way to run the organizer on Mac is to create an Automator app:
+
+1. **Open Automator** (built into macOS)
+2. Choose **"Application"** as document type
+3. Search for **"Run Shell Script"** and drag it to the workflow
+4. Paste this command (adjust the path to where you cloned this repo):
+   ```bash
+   /usr/bin/python3 "$HOME/path/to/folder-organizer/organize_folders.py"
+   ```
+5. **(Optional)** Add a notification:
+   - Search for **"Display Notification"**
+   - Drag it below the shell script
+   - Set Title: `Organize Complete`
+   - Set Message: `Your folders have been organized!`
+6. Save the app to a convenient location (e.g., Downloads folder as **"🧹 Organize Downloads"**)
+
+**First run:** macOS will ask for permissions to access your folders. Click "OK" to grant access.
+
+**Usage:** Double-click the app whenever you want to organize your folders. Simple!
+
+### Scheduled Automation (Advanced)
+
+If you prefer automatic scheduling:
+
+#### Linux/macOS (cron)
 
 Add to crontab (`crontab -e`):
 
@@ -165,7 +163,7 @@ Add to crontab (`crontab -e`):
 0 9 * * * /usr/bin/python3 /path/to/organize_folders.py
 ```
 
-### Windows (Task Scheduler)
+#### Windows (Task Scheduler)
 
 1. Open Task Scheduler
 2. Create Basic Task
@@ -173,6 +171,8 @@ Add to crontab (`crontab -e`):
 4. Action: Start a program
 5. Program: `python`
 6. Arguments: `C:\path\to\organize_folders.py`
+
+**Note:** Scheduled automation may require additional setup for file access permissions.
 
 ## How It Works
 
