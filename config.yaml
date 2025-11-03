@@ -1,0 +1,105 @@
+# Folder Organizer Configuration
+# Customize these settings to match your preferences
+
+# Directories to organize
+directories:
+  # Main source directory (usually Downloads)
+  source: "~/Downloads"
+  # Additional directories to organize (optional)
+  additional_sources:
+    - "~/Desktop"
+  # Where to move folders/projects (relative to source directory)
+  projects_folder: "Projects"
+
+# File organization rules
+file_mappings:
+  Audio:
+    - .mp3
+    - .wav
+    - .aac
+    - .flac
+    - .m4a
+    - .wma
+    - .ogg
+    - .aiff
+  Documents:
+    - .doc
+    - .docx
+    - .txt
+    - .rtf
+    - .odt
+    - .pages
+    - .md
+    - .html
+    - .py
+    - .vcf
+    - .vtt
+  Images:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .bmp
+    - .svg
+    - .webp
+    - .tiff
+    - .ico
+    - .heic
+  Invitations:
+    - .ics
+  PDFs:
+    - .pdf
+  Presentations:
+    - .ppt
+    - .pptx
+    - .key
+    - .odp
+  Screenshots: []  # Handled by filename detection
+  Spreadsheets:
+    - .xls
+    - .xlsx
+    - .csv
+    - .numbers
+    - .ods
+  Videos:
+    - .mp4
+    - .avi
+    - .mov
+    - .mkv
+    - .flv
+    - .wmv
+    - .webm
+    - .m4v
+    - .mpeg
+    - .mpg
+
+# Special filename patterns
+filename_patterns:
+  Screenshots:
+    - "screenshot"
+    - "screen recording"
+
+# Age-based file management (in days)
+age_management:
+  # Move files older than this to Archive subfolder (0 to disable)
+  archive_age_days: 30
+  # Delete files older than this (0 to disable)
+  delete_age_days: 90
+  # Rotate log entries older than this (0 to disable)
+  log_rotation_days: 90
+
+# Logging
+logging:
+  # Where to save the log file (relative to script location or absolute path)
+  log_file: "organize_log.txt"
+  # Enable/disable console output
+  console_output: true
+
+# Behavior options
+behavior:
+  # Skip hidden files/folders (starting with .)
+  skip_hidden: true
+  # Skip .app bundles (macOS applications)
+  skip_app_bundles: true
+  # Add timestamp to conflicting filenames
+  timestamp_conflicts: true
