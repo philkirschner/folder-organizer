@@ -8,6 +8,7 @@ directories:
   # Additional directories to organize (optional)
   additional_sources:
     - "~/Desktop"
+    - "~/Library/Mobile Documents/com~apple~CloudDocs/Downloads"
   # Where to move folders/projects (relative to source directory)
   projects_folder: "Projects"
 
