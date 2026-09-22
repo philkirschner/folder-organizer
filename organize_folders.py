@@ -190,6 +190,61 @@ behavior:
         category_folders.add(self.config['directories']['projects_folder'])
         return folder_name in category_folders
 
+    def process_aged_files(self, folder_path, label, archive_days, delete_days, allow_archive):
+        """Delete or archive the files directly inside folder_path based on age.
+
+        allow_archive is False for a z_Archive folder itself, since files already
+        there should only be checked for deletion, not re-archived into a nested
+        z_Archive/z_Archive.
+        """
+        archived_count = 0
+        deleted_count = 0
+        error_count = 0
+
+        try:
+            for item in folder_path.iterdir():
+                if item.is_dir():
+                    continue
+
+                age_days = self.get_file_age_days(item)
+
+                # Delete files older than DELETE_AGE_DAYS
+                if delete_days > 0 and age_days >= delete_days:
+                    try:
+                        item.unlink()
+                        self.log_message(f"  Deleted (>{delete_days} days old): {label}/{item.name}")
+                        deleted_count += 1
+                    except Exception as e:
+                        self.log_message(f"  ERROR deleting {item.name}: {e}")
+                        error_count += 1
+
+                # Archive files older than ARCHIVE_AGE_DAYS
+                elif allow_archive and archive_days > 0 and age_days >= archive_days:
+                    archive_folder = folder_path / "z_Archive"
+                    archive_folder.mkdir(exist_ok=True)
+
+                    destination_path = archive_folder / item.name
+
+                    if destination_path.exists() and self.config['behavior']['timestamp_conflicts']:
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        stem = destination_path.stem
+                        suffix = destination_path.suffix
+                        destination_path = archive_folder / f"{stem}_{timestamp}{suffix}"
+
+                    try:
+                        shutil.move(str(item), str(destination_path))
+                        self.log_message(f"  Archived (>{archive_days} days old): {label}/{item.name} → {label}/z_Archive/")
+                        archived_count += 1
+                    except Exception as e:
+                        self.log_message(f"  ERROR archiving {item.name}: {e}")
+                        error_count += 1
+
+        except Exception as e:
+            self.log_message(f"  ERROR processing {label} folder: {e}")
+            error_count += 1
+
+        return archived_count, deleted_count, error_count
+
     def archive_old_files(self):
         """Move old files to archive and delete very old files."""
         archive_days = self.config['age_management'].get('archive_age_days', 0)
@@ -213,47 +268,23 @@ behavior:
             if not category_path.exists():
                 continue
 
-            try:
-                for item in category_path.iterdir():
-                    if item.is_dir():
-                        continue
+            a, d, e = self.process_aged_files(
+                category_path, category, archive_days, delete_days, allow_archive=True
+            )
+            archived_count += a
+            deleted_count += d
+            error_count += e
 
-                    age_days = self.get_file_age_days(item)
-
-                    # Delete files older than DELETE_AGE_DAYS
-                    if delete_days > 0 and age_days >= delete_days:
-                        try:
-                            item.unlink()
-                            self.log_message(f"  Deleted (>{delete_days} days old): {category}/{item.name}")
-                            deleted_count += 1
-                        except Exception as e:
-                            self.log_message(f"  ERROR deleting {item.name}: {e}")
-                            error_count += 1
-
-                    # Archive files older than ARCHIVE_AGE_DAYS
-                    elif archive_days > 0 and age_days >= archive_days:
-                        archive_folder = category_path / "z_Archive"
-                        archive_folder.mkdir(exist_ok=True)
-
-                        destination_path = archive_folder / item.name
-
-                        if destination_path.exists() and self.config['behavior']['timestamp_conflicts']:
-                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                            stem = destination_path.stem
-                            suffix = destination_path.suffix
-                            destination_path = archive_folder / f"{stem}_{timestamp}{suffix}"
-
-                        try:
-                            shutil.move(str(item), str(destination_path))
-                            self.log_message(f"  Archived (>{archive_days} days old): {category}/{item.name} → {category}/z_Archive/")
-                            archived_count += 1
-                        except Exception as e:
-                            self.log_message(f"  ERROR archiving {item.name}: {e}")
-                            error_count += 1
-
-            except Exception as e:
-                self.log_message(f"  ERROR processing {category} folder: {e}")
-                error_count += 1
+            # z_Archive is a subfolder, so it's invisible to the iterdir() above -
+            # check it separately for files that have now crossed delete_age_days.
+            archive_folder = category_path / "z_Archive"
+            if archive_folder.exists():
+                a, d, e = self.process_aged_files(
+                    archive_folder, f"{category}/z_Archive", archive_days, delete_days, allow_archive=False
+                )
+                archived_count += a
+                deleted_count += d
+                error_count += e
 
         self.log_message(f"Archive/Delete complete: {archived_count} archived, {deleted_count} deleted, {error_count} errors")
 
